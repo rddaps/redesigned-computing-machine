@@ -1,32 +1,52 @@
-const { User, Book } = require("../models");
+const { User } = require("../models");
+const { signToken } = require('../utils/auth');
+
+
+// input BookInput {
+//   authors: [String]
+//   description: String
+//   title: String
+//   bookId: ID
+//   image: String
+//   link: String
+// }
 
 const resolvers = {
   Query: {
-    user: async () => {
-      return User.find({});
-    },
-    books: async (parent, { _id }) => {
-      const params = _id ? { _id } : {};
-      return Book.find(params);
-    },
+    me: async ({ parent, args, context }) => {
+      if (context.user) {
+        const foundUser = await User.findOne({ _id: context.user._id });
+        res.json(foundUser);
+      }
+    }
   },
   Mutation: {
-    saveBook: async (parent, { body }, context) => {
-        const { [], description, title }
+    login: async (parent, { email, password  }) => {
+      const user = await User.findOne({ email });
+      const correctPw = await user.isCorrectPassword({ password });
+      const token = signToken(user);
+      res.json({ token, user });
+    },
+    addUser: async ( parent, { body }) => {
+      const user = await User.create(body);
+      const token = signToken(user);
+    res.json({ token, user });
+    },
+    saveBook: async (parent, { bookInput }, context) => {
       if (context.user) {
         const updatedUser = await User.findOneAndUpdate(
           { _id: user._id },
-          { $addToSet: { savedBooks: body } },
+          { $addToSet: { input: bookInput } },
           { new: true, runValidators: true }
         );
         return updatedUser;
       }
     },
-    deleteBook: async (parent, { params.bookId }, context) => {
+    removeBook: async (parent, { bookId }, context) => {
       if (context.user) {
         const updatedUser = await User.findOneAndUpdate(
           { _id: user._id },
-          { $pull: { savedBooks: { bookId: params.bookId } } },
+          { $pull: { savedBooks: { bookId } } },
           { new: true }
         );
         return updatedUser;
