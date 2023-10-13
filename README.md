@@ -2,7 +2,7 @@
   # redesigned-computing-machine
   ## Description
 
-a fully functioning Google Books API search engine built with a RESTful API, and refactor it to be a GraphQL API built with Apollo Server
+a fully functioning Google Books API search engine built with a RESTful API, and refactored to a GraphQL API build, with Apollo Server
 
 ## Table of Contents
 
